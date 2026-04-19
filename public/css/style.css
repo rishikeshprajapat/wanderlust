@@ -1,0 +1,183 @@
+body{
+     font-family: "Plus Jakarta Sans", sans-serif !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    
+}
+.container{
+    flex:1;
+}
+/* ------------------Navbar Styles ------------------ */
+.navbar{
+    height: 5rem;
+    background-color: white;
+}
+.fa-compass{
+    color: rgb(151, 54, 54);
+    font-size: 2rem;
+}
+.nav-link{
+    color: #222222 !important;
+}
+
+/*------------------------------------- footer style ---------------------------*/
+/* ===== FOOTER BASE ===== */
+.f-info {  
+    background-color: #ebebeb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 2rem;
+    flex-wrap: wrap;   /* 🔥 important */
+}
+
+/* Links */
+.f-info-links a {
+    color: #222;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.f-info-links a:hover {
+    text-decoration: underline;
+}
+
+/* Sections */
+.f-info-links,
+.f-info-brand,
+.f-info-socials {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+/* Social Icons */
+.f-info-socials i {
+    margin-left: 1rem;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* ===== MOBILE VIEW ===== */
+@media (max-width: 768px) {
+    
+    .f-info {
+        flex-direction: column;   /* 🔥 stack layout */
+        text-align: center;
+        gap: 10px;
+    }
+
+    .f-info-links {
+        order: 2;
+    }
+
+    .f-info-brand {
+        order: 1;
+        font-weight: 500;
+    }
+
+    .f-info-socials {
+        order: 3;
+    }
+
+    .f-info-socials i {
+        margin: 0 8px;
+    }
+}
+/* -------------------cards styles--------------------------- */
+
+.listing-card{
+  border: none !important;
+  margin-bottom: 2rem;
+   /* margin-left: 0 !important; */
+}
+
+.card-img-top{
+    border-radius: 1rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.card-body{
+    padding: 0 !important;
+
+}
+
+.card-text p{
+    font-weight: 400;
+}
+
+.listing-link{
+    text-decoration: none;
+   
+}
+.card-img-overlay{
+    opacity: 0;
+}
+.card-img-overlay:hover{
+    opacity: 0.5;
+    background-color: white;
+}
+/* ---------------- Add Button Styles ---------------- */
+.add-btn {
+    background-color: #fe424d !important;
+    color: white !important;
+}
+/* -------------------show ---------------- */
+
+.edit-btn{
+    background-color: red !important;
+    border: none !important;
+    
+}
+
+/* --------------show page------------------- */
+
+.show-img{
+    
+    width: 500px !important; 
+    height: 35vh;
+    object-fit: cover !important;
+}
+
+.btns{
+    display: flex;
+}
+
+/* -----map----- */
+
+#map { 
+    height: 400px;
+    width: 110vh;
+ }
+
+ 
+ /* ----------------language---------------- */
+ .lang-btn {
+  background-color: #e9ecef !important;   /* light grey */
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.9rem;
+  color: #222 !important;
+  transition: all 0.3s ease;
+  margin-left: 15px ;
+ 
+}
+
+/* hover effect (thoda dark) */
+.lang-btn:hover {
+  background-color: #d6d8db;   /* darker grey */
+  color: black !important;
+}
+
+/* dropdown open hone par */
+.lang-btn:focus {
+  background-color: #ced4da;
+}
+
+ 
+#google_element select {
+  border-radius: 20px;
+  padding: 4px 8px;
+}

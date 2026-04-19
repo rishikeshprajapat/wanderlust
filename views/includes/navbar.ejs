@@ -1,0 +1,214 @@
+<style>
+/* ===== NAVBAR ===== */
+.navbar-custom {
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* ===== SEARCH ===== */
+.search-input{
+  border-radius: 25px;
+  padding: 0.4rem 0.8rem;
+}
+.search-btn{
+  background:#fe424d;
+  color:#fff;
+  border-radius: 25px;
+  padding: 0 0.8rem;
+}
+
+/* ===== LANGUAGE (SEARCH STYLE) ===== */
+.lang-btn{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f7f7f7;
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+.lang-btn:hover{
+  background:#eeeeee;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* ===== AUTH ===== */
+.auth-btn{
+  border-radius:20px;
+  padding:5px 12px;
+  margin-left:8px;
+}
+.signup-btn{ background:#fe424d; 
+  color:#fe424d !important
+ }
+.login-btn{ 
+     background:#f1f1f1; 
+     color:#fe424d !important;
+}
+
+
+/* ===== HAMBURGER ===== */
+.menu-btn{
+  border-radius:50%;
+  background:#f1f1f1;
+  padding:8px 10px;
+  border:none;
+}
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu{
+  position:fixed;
+  right:20px;
+  top:70px;
+  width:300px;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  display:none;
+  z-index:2000;
+}
+
+.menu-link{
+  display:block;
+  padding:8px 0;
+  text-decoration:none;
+  color:#333;
+}
+.menu-link:hover{
+  background:#f7f7f7;
+  border-radius:6px;
+}
+
+.menu-link-btn{
+  border:none;
+  background:none;
+  width:100%;
+  text-align:left;
+}
+</style>
+
+
+<nav class="navbar navbar-expand-md navbar-custom">
+  <div class="container-fluid">
+
+    <!-- Logo -->
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-regular fa-compass"></i>
+    </a>
+
+    <!-- ☰ -->
+    <button class="btn menu-btn d-md-none" onclick="toggleMenu()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Desktop -->
+    <div class="collapse navbar-collapse d-none d-md-flex">
+
+      <!-- Left -->
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+      </div>
+
+      <!-- Center Search -->
+      <form class="d-flex mx-auto" action="/listings" method="GET">
+        <input class="form-control me-2 search-input" name="query" placeholder="Search destinations">
+        <button class="btn search-btn">Search</button>
+      </form>
+
+      <!-- Right -->
+      <div class="navbar-nav ms-auto align-items-center">
+
+        <!-- Hidden Translator -->
+        <div id="google_element" style="display:none;"></div>
+
+        <!-- 🌐 LANGUAGE -->
+        <div class="dropdown me-3">
+          <a class="nav-link dropdown-toggle lang-btn" data-bs-toggle="dropdown">
+            🌐 Select Language
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeLang('en')">English</a></li>
+            <li><a class="dropdown-item" onclick="changeLang('hi')">Hindi</a></li>
+          </ul>
+        </div>
+
+        <!-- Airbnb -->
+        <a class="nav-link" href="/listings/new">Airbnb your home</a>
+
+        <% if(!currUser){ %>
+          <a class="nav-link auth-btn login-btn" href="/login">Login</a>
+          <a class="nav-link auth-btn login-btn" href="/signup">Signup</a>
+        <% } else { %>
+          <a class="nav-link btn auth-btn" href="/logout"><b>Logout</b></a>
+        <% } %>
+
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+
+<!-- 🔥 MOBILE MENU -->
+<div id="mobileMenu" class="mobile-menu">
+  <!-- Search -->
+  <form action="/listings" method="GET" class="p-3 border-bottom">
+    <input type="text" name="query" class="form-control" placeholder="Search destinations">
+  </form>
+  <!-- Language -->
+  <div class="p-3 border-bottom">
+    <div class="lang-btn justify-content-center mb-2">
+      🌐 Select Language
+    </div>
+    <a onclick="changeLang('en')" class="menu-link">English</a>
+    <a onclick="changeLang('hi')" class="menu-link">Hindi</a>
+  </div>
+
+  <!-- Host -->
+  <div class="p-3 border-bottom">
+    <a href="/listings/new" class="menu-link">Airbnb your home</a>
+  </div>
+
+  <!-- Auth -->
+  <div class="p-3">
+    <% if(!currUser){ %>
+      <a href="/login" class="menu-link">Log in</a>
+      <a href="/signup" class="menu-link">Sign up</a>
+    <% } else { %>
+         <a class="menu-link-btn" href="/logout"><b>Logout</b></a>
+    <% } %>
+  </div>
+
+</div>
+
+
+<!-- ===== JS ===== -->
+<script>
+function toggleMenu(){
+  let menu=document.getElementById("mobileMenu");
+  menu.style.display = (menu.style.display==="block") ? "none":"block";
+}
+
+function loadGoogleTranslate(){
+  new google.translate.TranslateElement(
+    {pageLanguage:'en',includedLanguages:'en,hi'},
+    'google_element'
+  );
+}
+
+function changeLang(lang){
+  let select=document.querySelector(".goog-te-combo");
+  if(select){
+    select.value=lang;
+    select.dispatchEvent(new Event("change"));
+  }
+}
+</script>
+
+<script src="https://translate.google.com/translate_a/element.js?cb=loadGoogleTranslate"></script>
