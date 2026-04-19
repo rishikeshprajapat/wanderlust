@@ -4,7 +4,7 @@ const router=express.Router();
 
 const {isLoggedIn, isOwner,validateListing}=require("../middleware.js");
 
-const wrapAsync=require("../utils/Wrapasync");
+const wrapAsync=require("../utils/wrapAsync");
 
 const { populate } = require("../models/user.js");
 
