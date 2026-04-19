@@ -69,6 +69,15 @@ app.use(passport.session());
 passport.use(new LocalStraregy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// Middleware to set res.locals for views
+app.use((req, res, next) => {
+    res.locals.currUser = req.user;
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
 // ---------------------------------
 
 app.use(express.json());
