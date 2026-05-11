@@ -141,7 +141,7 @@
         <!-- Airbnb -->
         <a class="nav-link" href="/listings/new">Airbnb your home</a>
 
-        <% if(!currUser){ %>
+        <% if(typeof currUser === 'undefined' || !currUser){ %>
           <a class="nav-link auth-btn login-btn" href="/login">Login</a>
           <a class="nav-link auth-btn login-btn" href="/signup">Signup</a>
         <% } else { %>
@@ -177,7 +177,7 @@
 
   <!-- Auth -->
   <div class="p-3">
-    <% if(!currUser){ %>
+    <% if(typeof currUser === 'undefined' || !currUser){ %>
       <a href="/login" class="menu-link">Log in</a>
       <a href="/signup" class="menu-link">Sign up</a>
     <% } else { %>

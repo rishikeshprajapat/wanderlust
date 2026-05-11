@@ -1,10 +1,5 @@
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config({ debug: true });
-}
-
-
-// console.log(process.env.SECRET);
+require('dotenv').config();
 
 const express=require('express');
 const app=express();
@@ -45,9 +40,9 @@ store.on("error", function (e) {
 
 const sessionOption = {
     store,
-    secret: process.env.SECRET,
+    secret: process.env.SECRET || "thisShouldBeReplacedWithASecureSecret",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {  
         expires: Date.now() + 24 * 60 * 60 * 7 * 1000,
         maxAge: 24 * 60 * 60 * 7 * 1000, 
@@ -69,7 +64,7 @@ passport.deserializeUser(User.deserializeUser());
 
 // Middleware to set res.locals for views
 app.use((req, res, next) => {
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
