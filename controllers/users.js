@@ -15,7 +15,9 @@ module.exports.signUpPostUser=async(req,res,next)=>{
            return next(err);
         }
         req.flash("success","Welcome to wanderLust");
-        res.redirect(req.session.redirectUrl);
+        const redirectUrl = req.session.redirectUrl || "/listings";
+        delete req.session.redirectUrl;
+        res.redirect(redirectUrl);
      })
     //  req.flash("success","Welcome to WanderLust!");
     //  res.redirect("/listings");
