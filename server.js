@@ -110,15 +110,10 @@ async function main() {
 
 //-------------------Validate schema --handle the backend error(by joi)-----------------------------
 
-//      write here
 
 // -----------------------------------------------validate review-------------
-//      write here
-// -------------------------------------------------------------
-// app.get("/",(req,res)=>{
-//     console.log("jai jp");
-//     res.send("Hello World");
-// })
+
+
 
 
 // -----------------------
