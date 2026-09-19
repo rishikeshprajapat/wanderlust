@@ -5,7 +5,14 @@ const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 
 const mapToken = process.env.MAP_TOKEN;
 
-const geocodingClient = mbxGeocoding({ accessToken: mapToken });
+
+//const geocodingClient = mbxGeocoding({ accessToken: mapToken });
+let geocodingClient;
+if (mapToken) {
+  geocodingClient = mbxGeocoding({
+    accessToken: mapToken,
+  });
+}
 // show all listing form --------
 
 // module.exports.index=async(req,res)=>{
@@ -65,36 +72,54 @@ module.exports.showListing=async(req,res)=>{
 }
 
 // --------------------------create listing------------------
+module.exports.createListing = async (req, res) => {
+  // 1. Validate listing data
+  if (!req.body.listing || !req.body.listing.title) {
+    throw new ExpressError(400, "Invalid listing data");
+  }
 
-module.exports.createListing=async (req, res) => {
-// map
-const response = await geocodingClient.forwardGeocode({
-  query: req.body.listing.location,
-  limit: 1
-})
-  .send()
-  
+  // 2. Check Mapbox token
+  if (!geocodingClient) {
+    throw new ExpressError(500, "MAP_TOKEN is missing");
+  }
 
-  // -----
-    let url = req.file.path; 
-    let filename=req.file.filename
-    
-    // optional safety check
-    if (!req.body.listing || !req.body.listing.title) {
-        throw new ExpressError(400, "Invalid listing data");
-    }
-    const listing = new Listing(req.body.listing); 
-    // new user info 
-    listing.owner=req.user._id;
-    listing.image={url,filename};
-    listing.geometry=response.body.features[0].geometry;
+  // 3. Check uploaded image
+  if (!req.file) {
+    throw new ExpressError(400, "Please upload an image");
+  }
 
-    let savedListing=await listing.save();
-     
-    req.flash("success", "Listing created successfully!");
-    res.redirect("/listings");
-}
+  // 4. Get location coordinates using Mapbox
+  const response = await geocodingClient
+    .forwardGeocode({
+      query: req.body.listing.location,
+      limit: 1,
+    })
+    .send();
 
+  // 5. Check whether location was found
+  if (!response.body.features.length) {
+    req.flash("error", "Location not found. Please enter a valid location.");
+    return res.redirect("/listings/new");
+  }
+
+  // 6. Get image details from Cloudinary
+  const url = req.file.path;
+  const filename = req.file.filename;
+
+  // 7. Create new listing
+  const listing = new Listing(req.body.listing);
+
+  listing.owner = req.user._id;
+  listing.image = { url, filename };
+  listing.geometry = response.body.features[0].geometry;
+
+  // 8. Save listing in MongoDB
+  await listing.save();
+
+  // 9. Show success message
+  req.flash("success", "Listing created successfully!");
+  res.redirect("/listings");
+};
 // -----------------------------edit listing----------------
 
 module.exports.editFormListing=async(req,res)=>{
