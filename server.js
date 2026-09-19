@@ -20,6 +20,7 @@ const MongoStore = require('connect-mongo');
 const flash=require('connect-flash');
 
 const port = process.env.PORT || 3000;
+const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/trip_planner";
 
 // ---------------authentication--------
 const passport=require('passport');
@@ -27,10 +28,8 @@ const LocalStraregy=require('passport-local');
 const User=require('./models/user.js');
 
 // -----------------session ------------------------
-const dbURL=process.env.DB_URL;
-
-if (!dbURL) {
-  console.warn("Missing DB_URL environment variable. Set it in your deployment environment.");
+if (!process.env.DB_URL) {
+    console.warn("DB_URL not set. Falling back to local MongoDB at mongodb://127.0.0.1:27017/trip_planner");
 }
 
 app.set('trust proxy', 1);
@@ -105,8 +104,9 @@ main()
 .catch(err => console.log(err));
 
 async function main() {
-    if (!dbURL) return;
-    await mongoose.connect(dbURL);
+    await mongoose.connect(dbURL, {
+        serverSelectionTimeoutMS: 5000,
+    });
 }
 
 //-------------------Validate schema --handle the backend error(by joi)-----------------------------
@@ -131,6 +131,10 @@ app.use((req, res, next) => {
 // ----------------------------authentiaction and autherization---------------------
 app.get("/", (req, res) => {
     res.redirect("/listings");
+});
+
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
 });
 
 app.get("/demouser",async(req,res)=>{
@@ -172,10 +176,14 @@ app.use((err, req, res, next) => {
     // res.status(status).send(message);
 });
 
-if (require.main === module) {
+const startServer = () => {
     app.listen(port, () => {
         console.log(`server is listening on port ${port}`);
     });
+};
+
+if (require.main === module) {
+    startServer();
 }
 
 module.exports = app;
