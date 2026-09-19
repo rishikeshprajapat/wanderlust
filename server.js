@@ -19,6 +19,8 @@ const MongoStore = require('connect-mongo');
 
 const flash=require('connect-flash');
 
+const port = process.env.PORT || 3000;
+
 // ---------------authentication--------
 const passport=require('passport');
 const LocalStraregy=require('passport-local');
@@ -27,7 +29,12 @@ const User=require('./models/user.js');
 // -----------------session ------------------------
 const dbURL=process.env.DB_URL;
 
+if (!dbURL) {
+  console.error("Missing DB_URL environment variable. Set it in your deployment environment.");
+  process.exit(1);
+}
 
+app.set('trust proxy', 1);
 
 const store = MongoStore.create({
   mongoUrl: dbURL,
@@ -46,7 +53,9 @@ const sessionOption = {
     cookie: {  
         expires: Date.now() + 24 * 60 * 60 * 7 * 1000,
         maxAge: 24 * 60 * 60 * 7 * 1000, 
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax"
     }
 };
 
@@ -159,6 +168,6 @@ app.use((err, req, res, next) => {
     // res.status(status).send(message);
 });
 
-app.listen(3000,(req,res)=>{
-    console.log("server is listening on port 3000");
+app.listen(port,(req,res)=>{
+    console.log(`server is listening on port ${port}`);
 })
