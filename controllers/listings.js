@@ -97,12 +97,24 @@ module.exports.createListing = async (req, res) => {
   }
 
   // 4. Get location coordinates using Mapbox
-  const response = await geocodingClient
-    .forwardGeocode({
-      query: location,
-      limit: 1,
-    })
-    .send();
+  let response;
+  try {
+    response = await geocodingClient
+      .forwardGeocode({
+        query: location,
+        limit: 1,
+      })
+      .send();
+  } catch (error) {
+    if (error.statusCode === 401 || error.status === 401) {
+      throw new ExpressError(
+        503,
+        "Mapbox token is invalid or expired. Update MAP_TOKEN in Vercel Production Environment Variables."
+      );
+    }
+
+    throw error;
+  }
 
   // 5. Check whether location was found
   if (!response.body || !response.body.features || !response.body.features.length) {
