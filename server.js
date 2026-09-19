@@ -129,6 +129,10 @@ app.use((req, res, next) => {
     next();
 });
 // ----------------------------authentiaction and autherization---------------------
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 app.get("/demouser",async(req,res)=>{
     let fakeuser=new User({
         email:"Student@gmail.com",
