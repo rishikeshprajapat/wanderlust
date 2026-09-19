@@ -62,8 +62,10 @@ module.exports.showListing=async(req,res)=>{
             req.flash("error", "Listing you request for does not exit!");
              return  res.redirect("/listings");
         }
-        let originalImageUrl=listing.image.url;
-        let  originalImageUrl1= originalImageUrl.replace("/upload","/upload/w_250");
+        let originalImageUrl1 = "";
+        if (listing.image && listing.image.url) {
+          originalImageUrl1 = listing.image.url.replace("/upload", "/upload/w_250");
+        }
        res.render("listings/show.ejs",{
       list: listing,
       originalImageUrl1,
@@ -78,27 +80,32 @@ module.exports.createListing = async (req, res) => {
     throw new ExpressError(400, "Invalid listing data");
   }
 
-  // 2. Check Mapbox token
-  const geocodingClient = createGeocodingClient();
-  if (!geocodingClient) {
-    throw new ExpressError(500, "MAP_TOKEN is missing");
-  }
-
-  // 3. Check uploaded image
+  // 2. Check uploaded image
   if (!req.file) {
     throw new ExpressError(400, "Please upload an image");
+  }
+
+  const location = req.body.listing.location;
+  if (!location || !location.trim()) {
+    throw new ExpressError(400, "Please enter a location");
+  }
+
+  // 3. Check Mapbox token
+  const geocodingClient = createGeocodingClient();
+  if (!geocodingClient) {
+    throw new ExpressError(500, "MAP_TOKEN is missing. Please configure it in Vercel.");
   }
 
   // 4. Get location coordinates using Mapbox
   const response = await geocodingClient
     .forwardGeocode({
-      query: req.body.listing.location,
+      query: location,
       limit: 1,
     })
     .send();
 
   // 5. Check whether location was found
-  if (!response.body.features.length) {
+  if (!response.body || !response.body.features || !response.body.features.length) {
     req.flash("error", "Location not found. Please enter a valid location.");
     return res.redirect("/listings/new");
   }
@@ -155,6 +162,11 @@ module.exports.deleteListing=async(req,res)=>{
      const { id } = req.params;
     // 1. Find listing
     const listing = await Listing.findById(id);
+
+    if (!listing) {
+      req.flash("error", "Listing not found!");
+      return res.redirect("/listings");
+    }
 
     // 2. Delete image from Cloudinary
     if (listing.image && listing.image.filename) {
