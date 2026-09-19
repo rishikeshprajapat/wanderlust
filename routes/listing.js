@@ -7,6 +7,7 @@ const {isLoggedIn, isOwner,validateListing}=require("../middlewares.js");
 const wrapAsync=require("../utils/wrapAsync");
 
 const { populate } = require("../models/user.js");
+const ExpressError = require("../utils/ExpressError.js");
 
 const listingController=require("../controllers/listings.js");
 
@@ -14,6 +15,24 @@ const listingController=require("../controllers/listings.js");
 const{ storage}=require("../cloudConfig.js");
 const multer  = require('multer');
 const upload = multer({ storage })
+
+const requireCloudinaryConfig = (req, res, next) => {
+	const requiredVariables = [
+		"CLOUD_NAME",
+		"CLOUD_API_KEY",
+		"CLOUD_API_SECRET",
+	];
+
+	const missingVariables = requiredVariables.filter((name) => !process.env[name]);
+	if (missingVariables.length) {
+		return next(new ExpressError(
+			503,
+			`Cloudinary is not configured. Missing: ${missingVariables.join(", ")}`
+		));
+	}
+
+	next();
+};
 
 
 // -----------------------------------------validate listing-----------------
@@ -23,7 +42,7 @@ const upload = multer({ storage })
 // ----------do the router.route--------------------------
 router.route("/")
 .get(wrapAsync(listingController.index))
- .post(isLoggedIn,upload.single('listing[image]'),validateListing, wrapAsync(listingController.createListing));
+ .post(isLoggedIn,requireCloudinaryConfig,upload.single('listing[image]'),validateListing, wrapAsync(listingController.createListing));
 // .post( upload.single('listing[image]'),(req,res)=>{
 // res.send(req.file);
 // });
@@ -38,7 +57,7 @@ router.get("/new",isLoggedIn,listingController.newRanderNewForm);
 
 router.route("/:id")
 .get(wrapAsync(listingController.showListing))
-.put(isLoggedIn,isOwner,upload.single('listing[image]'),validateListing,wrapAsync(listingController.putListingRoute))
+.put(isLoggedIn,isOwner,requireCloudinaryConfig,upload.single('listing[image]'),validateListing,wrapAsync(listingController.putListingRoute))
 .delete(isLoggedIn,isOwner,wrapAsync(listingController.deleteListing));
 
 //.get("/edit",isLoggedIn,isOwner,wrapAsync(listingController.editFormListing));
