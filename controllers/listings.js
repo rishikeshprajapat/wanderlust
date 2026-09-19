@@ -3,16 +3,15 @@ const { cloudinary } = require("../cloudConfig");
 
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 
-const mapToken = process.env.MAP_TOKEN;
+const createGeocodingClient = () => {
+  const mapToken = process.env.MAP_TOKEN;
 
+  if (!mapToken) {
+    return null;
+  }
 
-//const geocodingClient = mbxGeocoding({ accessToken: mapToken });
-let geocodingClient;
-if (mapToken) {
-  geocodingClient = mbxGeocoding({
-    accessToken: mapToken,
-  });
-}
+  return mbxGeocoding({ accessToken: mapToken });
+};
 // show all listing form --------
 
 // module.exports.index=async(req,res)=>{
@@ -79,6 +78,7 @@ module.exports.createListing = async (req, res) => {
   }
 
   // 2. Check Mapbox token
+  const geocodingClient = createGeocodingClient();
   if (!geocodingClient) {
     throw new ExpressError(500, "MAP_TOKEN is missing");
   }
