@@ -20,7 +20,11 @@ const MongoStore = require('connect-mongo');
 const flash=require('connect-flash');
 
 const port = process.env.PORT || 3000;
-const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/trip_planner";
+const dbURL = process.env.DB_URL;
+
+if (!dbURL) {
+    throw new Error("DB_URL is required. Configure it in the deployment environment.");
+}
 
 // ---------------authentication--------
 const passport=require('passport');
@@ -28,10 +32,6 @@ const LocalStraregy=require('passport-local');
 const User=require('./models/user.js');
 
 // -----------------session ------------------------
-if (!process.env.DB_URL) {
-    console.warn("DB_URL not set. Falling back to local MongoDB at mongodb://127.0.0.1:27017/trip_planner");
-}
-
 app.set('trust proxy', 1);
 
 const store = MongoStore.create({
@@ -58,6 +58,34 @@ const sessionOption = {
 };
 
 
+
+let dbConnectionPromise;
+
+const connectToDatabase = () => {
+    if (mongoose.connection.readyState === 1) {
+        return Promise.resolve();
+    }
+
+    if (!dbConnectionPromise) {
+        dbConnectionPromise = mongoose.connect(dbURL, {
+            serverSelectionTimeoutMS: 5000,
+        }).catch((error) => {
+            dbConnectionPromise = undefined;
+            throw error;
+        });
+    }
+
+    return dbConnectionPromise;
+};
+
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 app.use(session(sessionOption));
 app.use(flash());
@@ -93,21 +121,6 @@ const reviewRoutes=require("./routes/review.js");
 const userRoutes=require("./routes/user.js");
 
 
-
-// ------------------------database connection---------------------
-
-
-main()
-.then(() => {
-    console.log("MongoDB connected");
-})
-.catch(err => console.log(err));
-
-async function main() {
-    await mongoose.connect(dbURL, {
-        serverSelectionTimeoutMS: 5000,
-    });
-}
 
 //-------------------Validate schema --handle the backend error(by joi)-----------------------------
 
