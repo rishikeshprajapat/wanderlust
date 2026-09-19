@@ -10,7 +10,7 @@ const User=require('../models/user.js');
 
 const Wrapasync = require("../utils/wrapAsync.js");
 
-const { saveRedirectedUrl } = require("../middleware.js");
+const { saveRedirectedUrl } = require("../middlewares.js");
 
 const usersControllers=require('../controllers/users.js');
 

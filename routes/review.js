@@ -7,7 +7,7 @@ const wrapAsync=require("../utils/wrapAsync");
 
 const {listingSchema,reviewSchema} = require('../schema.js');
 // ------
-const {validateReview,isLoggedIn, isReviewAuthor}=require("../middleware.js");
+const {validateReview,isLoggedIn, isReviewAuthor}=require("../middlewares.js");
 
 const reviewController=require('../controllers/reviews.js');
 //--------------------validate reciew--------------------------------
