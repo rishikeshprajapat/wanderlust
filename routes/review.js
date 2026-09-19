@@ -7,7 +7,7 @@ const wrapAsync=require("../utils/wrapAsync");
 
 const {listingSchema,reviewSchema} = require('../schema.js');
 // ------
-const {validateReview,isLoggedIn, isReviewAuther}=require("../middleware.js");
+const {validateReview,isLoggedIn, isReviewAuthor}=require("../middleware.js");
 
 const reviewController=require('../controllers/reviews.js');
 //--------------------validate reciew--------------------------------
@@ -19,7 +19,7 @@ router.post("/",isLoggedIn,validateReview,wrapAsync(reviewController.createNewRe
 );
 
 // -------------------------------delete review------------------------
-router.delete("/:reviewId",isLoggedIn,isReviewAuther,wrapAsync(reviewController.deleteReviews)
+router.delete("/:reviewId",isLoggedIn,isReviewAuthor,wrapAsync(reviewController.deleteReviews)
 );
 
 module.exports=router;
