@@ -30,8 +30,7 @@ const User=require('./models/user.js');
 const dbURL=process.env.DB_URL;
 
 if (!dbURL) {
-  console.error("Missing DB_URL environment variable. Set it in your deployment environment.");
-  process.exit(1);
+  console.warn("Missing DB_URL environment variable. Set it in your deployment environment.");
 }
 
 app.set('trust proxy', 1);
@@ -106,6 +105,7 @@ main()
 .catch(err => console.log(err));
 
 async function main() {
+    if (!dbURL) return;
     await mongoose.connect(dbURL);
 }
 
@@ -168,6 +168,10 @@ app.use((err, req, res, next) => {
     // res.status(status).send(message);
 });
 
-app.listen(port,(req,res)=>{
-    console.log(`server is listening on port ${port}`);
-})
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`server is listening on port ${port}`);
+    });
+}
+
+module.exports = app;
