@@ -1,5 +1,6 @@
 const Listing=require('../models/listing');
 const { cloudinary } = require("../cloudConfig");
+const ExpressError = require("../utils/ExpressError");
 
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 

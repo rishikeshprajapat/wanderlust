@@ -22,10 +22,6 @@ const flash=require('connect-flash');
 const port = process.env.PORT || 3000;
 const dbURL = process.env.DB_URL;
 
-if (!dbURL) {
-    throw new Error("DB_URL is required. Configure it in the deployment environment.");
-}
-
 // ---------------authentication--------
 const passport=require('passport');
 const LocalStraregy=require('passport-local');
@@ -34,17 +30,21 @@ const User=require('./models/user.js');
 // -----------------session ------------------------
 app.set('trust proxy', 1);
 
-const store = MongoStore.create({
-  mongoUrl: dbURL,
-  touchAfter: 24 * 3600,
-});
+const store = dbURL
+    ? MongoStore.create({
+        mongoUrl: dbURL,
+        touchAfter: 24 * 3600,
+    })
+    : undefined;
 
-store.on("error", function (e) {
-  console.log("SESSION STORE ERROR", e);
-});
+if (store) {
+    store.on("error", function (e) {
+        console.error("SESSION STORE ERROR", e);
+    });
+}
 
 const sessionOption = {
-    store,
+    ...(store ? { store } : {}),
     secret: process.env.SECRET || "thisShouldBeReplacedWithASecureSecret",
     resave: false,
     saveUninitialized: false,
@@ -62,6 +62,10 @@ const sessionOption = {
 let dbConnectionPromise;
 
 const connectToDatabase = () => {
+    if (!dbURL) {
+        return Promise.reject(new ExpressError(503, "Database is not configured. Set DB_URL in Vercel Environment Variables."));
+    }
+
     if (mongoose.connection.readyState === 1) {
         return Promise.resolve();
     }
@@ -77,6 +81,10 @@ const connectToDatabase = () => {
 
     return dbConnectionPromise;
 };
+
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
 
 app.use(async (req, res, next) => {
     try {
@@ -146,10 +154,6 @@ app.get("/", (req, res) => {
     res.redirect("/listings");
 });
 
-app.get("/health", (req, res) => {
-    res.status(200).json({ status: "ok" });
-});
-
 app.get("/demouser",async(req,res)=>{
     let fakeuser=new User({
         email:"Student@gmail.com",
@@ -184,9 +188,25 @@ app.use((req, res, next) => {
 
 // ✅ error handler
 app.use((err, req, res, next) => {
-    let { statusCode = 500, message = "Something went wrong" } = err;
-    res.status(statusCode).render("error.ejs",{message});
-    // res.status(status).send(message);
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Something went wrong";
+
+    console.error("REQUEST ERROR", {
+        method: req.method,
+        path: req.originalUrl,
+        statusCode,
+        error: err.stack || err,
+    });
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
+    if (req.accepts("json") && !req.accepts("html")) {
+        return res.status(statusCode).json({ error: message });
+    }
+
+    res.status(statusCode).render("error.ejs", { message });
 });
 
 const startServer = () => {
